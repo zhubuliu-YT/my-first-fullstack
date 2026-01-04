@@ -37,7 +37,7 @@ const newName = ref('')
 const isSaving = ref(false)
 
 const loadData = async () => {
-  const res = await fetch('http://localhost:3000/api/user')
+  const res = await fetch('/api/user')
   userData.value = await res.json()
 }
 
@@ -46,7 +46,7 @@ const updateName = async () => {
   
   isSaving.value = true
   try {
-    await fetch('http://localhost:3000/api/update', {
+    await fetch('/api/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newName.value })

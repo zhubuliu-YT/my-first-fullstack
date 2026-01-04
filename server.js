@@ -38,4 +38,9 @@ app.post('/api/update', async (req, res) => {
     res.json({ status: "写入成功！", data: newDoc });
 });
 
-app.listen(3000, () => console.log('🚀 服务器运行在 http://localhost:3000'));
+// 必须这样写，云端才能访问
+const port = process.env.PORT || 3000;
+
+app.listen(port, "0.0.0.0", () => {
+    console.log(`🚀 服务器上线，监听端口: ${port}`);
+});
