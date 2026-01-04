@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的全栈系统</title>
+    <style>
+        /* CSS：让界面好看一点 */
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f9;
+            padding: 50px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: inline-block;
+            min-width: 200px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover { background-color: #0056b3; }
+        #info { margin-top: 20px; color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>全栈控制台</h1>
+        <button onclick="fetchUserData()">获取后端数据</button>
+        <div id="info">等待请求...</div>
+    </div>
+
+    <script>
+        // 前端 JavaScript：负责和后端“打电话”
+        function fetchUserData() {
+            const infoDiv = document.getElementById('info');
+            infoDiv.innerText = "正在连接服务器...";
+
+            // 使用 fetch 向我们刚才在 server.js 定义的路由发请求
+            fetch('/api/user')
+                .then(response => {
+                    if (!response.ok) throw new Error('网络响应错误');
+                    return response.json(); // 把收到的数据转成 JSON 对象
+                })
+                .then(data => {
+                    // 把数据显示在网页上
+                    infoDiv.innerHTML = `
+                        <p>👤 用户名：${data.name}</p>
+                        <p>⭐ 等级：${data.level}</p>
+                        <p>📝 状态：${data.status}</p>
+                    `;
+                })
+                .catch(error => {
+                    infoDiv.innerText = "错误: " + error.message;
+                });
+        }
+    </script>
+</body>
+</html>
