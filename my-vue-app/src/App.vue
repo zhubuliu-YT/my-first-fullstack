@@ -5,7 +5,7 @@
         <div class="card-header">
           <span>🚀 全栈匿名留言板</span>
           <el-button type="success" size="small" @click="loadData" circle>
-            <el-icon><Refresh /></el-icon>
+            刷新
           </el-button>
         </div>
       </template>
@@ -47,26 +47,24 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
 
 const newName = ref('')
 const messageList = ref([])
 const isSaving = ref(false)
 
-// 加载数据
+// 【关键】加载数据：使用相对路径 '/api/messages'
 const loadData = async () => {
   try {
-    // 使用相对路径，适配云端部署
     const res = await fetch('/api/messages')
     if (!res.ok) throw new Error('服务器响应异常')
     messageList.value = await res.json()
   } catch (error) {
-    ElMessage.error('获取数据失败，请检查后端状态')
+    ElMessage.error('获取数据失败，请检查后端是否在线')
     console.error(error)
   }
 }
 
-// 提交数据
+// 提交新留言
 const updateName = async () => {
   if (!newName.value.trim()) return ElMessage.warning('内容不能为空哦')
   
@@ -84,7 +82,7 @@ const updateName = async () => {
       await loadData() // 刷新列表
     }
   } catch (error) {
-    ElMessage.error('发送失败，请稍后再试')
+    ElMessage.error('发送失败，请检查网络')
   } finally {
     isSaving.value = false
   }
@@ -95,31 +93,23 @@ onMounted(loadData)
 
 <style scoped>
 .main-container {
-  max-width: 700px;
+  max-width: 600px;
   margin: 40px auto;
   padding: 0 20px;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
-  font-size: 1.2rem;
 }
 .input-section {
   display: flex;
-  gap: 12px;
-  margin-bottom: 30px;
-}
-.msg-item h4 {
-  margin: 0 0 10px 0;
-  color: #303133;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 .list-section {
-  margin-top: 20px;
   max-height: 60vh;
   overflow-y: auto;
-  padding-right: 10px;
 }
 </style>

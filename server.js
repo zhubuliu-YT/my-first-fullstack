@@ -4,20 +4,20 @@ const Datastore = require('nedb-promises');
 const path = require('path');
 
 const app = express();
-// 适配云端端口，Zeabur 会自动分配端口到 process.env.PORT
+// 适配云端端口：Zeabur 会自动通过 process.env.PORT 分配端口
 const port = process.env.PORT || 3000;
 
-// 初始化数据库
+// 初始化数据库：使用绝对路径确保云端能找到文件
 const dbPath = path.join(__dirname, 'database.db');
 const db = Datastore.create({ filename: dbPath, autoload: true });
 
 // 中间件配置
 app.use(cors());
 app.use(express.json());
-// 如果你把 Vue 打包后的 dist 放在这里，这行就起作用
+// 静态文件服务：如果你的 Vue 打包放在 public 文件夹下，这行很重要
 app.use(express.static('public')); 
 
-// 路由 1：获取所有留言（按时间倒序）
+// 路由 1：获取所有留言（按时间倒序排列）
 app.get('/api/messages', async (req, res) => {
     try {
         const allMessages = await db.find({}).sort({ date: -1 });
@@ -36,7 +36,7 @@ app.post('/api/update', async (req, res) => {
         const newMessage = {
             name: name,
             date: new Date().toLocaleString(),
-            level: Math.floor(Math.random() * 10) + 1 // 随机 1-10 级
+            level: Math.floor(Math.random() * 10) + 1 // 随机等级 1-10
         };
 
         const newDoc = await db.insert(newMessage);
@@ -47,5 +47,5 @@ app.post('/api/update', async (req, res) => {
 });
 
 app.listen(port, "0.0.0.0", () => {
-    console.log(`🚀 全栈后台已就绪: http://localhost:${port}`);
+    console.log(`🚀 后端已就绪，端口: ${port}`);
 });
