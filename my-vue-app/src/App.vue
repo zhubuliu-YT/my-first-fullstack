@@ -1,62 +1,55 @@
 <template>
   <div style="max-width: 600px; margin: 50px auto;">
     <el-card shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>🚀 全栈开发者控制台</span>
-        </div>
-      </template>
+      <template #header><span>💬 全栈匿名留言板</span></template>
       
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <el-input v-model="newName" placeholder="请输入您的尊姓大名" clearable />
-        <el-button type="primary" @click="updateName" :loading="isSaving">
-          保存修改
-        </el-button>
+        <el-input v-model="newName" placeholder="说点什么吧..." />
+        <el-button type="primary" @click="updateName">发布留言</el-button>
       </div>
 
-      <el-descriptions title="当前系统状态" :column="1" border>
-        <el-descriptions-item label="👤 当前用户">{{ userData.name }}</el-descriptions-item>
-        <el-descriptions-item label="⭐ 开发者等级">
-          <el-tag size="small">Level {{ userData.level }}</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="📡 后端状态">
-          <el-badge is-dot type="success"> 运行中 (Port 3000) </el-badge>
-        </el-descriptions-item>
-      </el-descriptions>
+      <el-timeline>
+        <el-timeline-item
+          v-for="(item, index) in messageList"
+          :key="index"
+          :timestamp="item.date"
+          placement="top"
+        >
+          <el-card>
+            <h4>{{ item.name }}</h4>
+            <p>开发者等级：<el-tag size="small">Lv {{ item.level }}</el-tag></p>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+      
+      <el-empty v-if="messageList.length === 0" description="暂无留言" />
     </el-card>
   </div>
 </template>
 
 <script setup>
-// ... 这里保持之前的逻辑，只需增加一个 isSaving 状态 ...
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus' // 引入漂亮的消息提示
+import { ElMessage } from 'element-plus'
 
-const userData = ref({ name: '', level: 0 })
 const newName = ref('')
-const isSaving = ref(false)
+const messageList = ref([]) // 存储留言列表的数组
 
 const loadData = async () => {
-  const res = await fetch('/api/user')
-  userData.value = await res.json()
+  const res = await fetch('/api/messages') // 调用获取全部数据的接口
+  messageList.value = await res.json()
 }
 
 const updateName = async () => {
-  if (!newName.value) return ElMessage.warning('名字不能为空哦！')
+  if (!newName.value) return ElMessage.warning('内容不能为空')
   
-  isSaving.value = true
-  try {
-    await fetch('/api/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName.value })
-    })
-    ElMessage.success('保存成功！数据已持久化。')
-    await loadData()
-    newName.value = ''
-  } finally {
-    isSaving.value = false
-  }
+  await fetch('/api/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: newName.value })
+  })
+  
+  newName.value = '' // 清空输入框
+  loadData() // 重新加载列表
 }
 
 onMounted(loadData)

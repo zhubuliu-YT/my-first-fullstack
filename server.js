@@ -24,18 +24,25 @@ async function initDB() {
 }
 initDB();
 
-// 路由 1：获取数据 (Read)
-app.get('/api/user', async (req, res) => {
-    const docs = await db.find({});
-    res.json(docs[0] || { name: "全栈工程师 [求互骂擦]", level: 0 });
+// 1. 获取所有留言 (Read All)
+app.get('/api/messages', async (req, res) => {
+    // 按照时间倒序排列，最新的留言在最上面
+    const allMessages = await db.find({}).sort({ date: -1 }); 
+    res.json(allMessages);
 });
 
-// 路由 2：保存数据 (Update)
+// 2. 插入新留言 (Create)
 app.post('/api/update', async (req, res) => {
     const receivedName = req.body.name;
-    await db.remove({}, { multi: true }); // 清空旧的
-    const newDoc = await db.insert({ name: receivedName, level: 100 }); // 存入新的
-    res.json({ status: "写入成功！", data: newDoc });
+    const newMessage = { 
+        name: receivedName, 
+        date: new Date().toLocaleString(), // 记录留言时间
+        level: Math.floor(Math.random() * 10) // 随机给个等级玩玩
+    };
+    
+    // 注意：删掉之前的 db.remove({})，我们现在要保留历史！
+    const newDoc = await db.insert(newMessage); 
+    res.json({ status: "留言成功！", data: newDoc });
 });
 
 // 必须这样写，云端才能访问
